@@ -179,7 +179,7 @@ defmodule Explorer.Chain.Address do
     |> stream_binary()
     |> Stream.zip(match_byte_stream)
     |> Enum.map(fn
-      {digit, _} when digit in '0123456789' ->
+      {digit, _} when digit in ~c"0123456789" ->
         digit
 
       {alpha, 1} ->
@@ -207,7 +207,7 @@ defmodule Explorer.Chain.Address do
     |> stream_binary()
     |> Stream.zip(match_byte_stream)
     |> Enum.map(fn
-      {digit, _} when digit in '0123456789' ->
+      {digit, _} when digit in ~c"0123456789" ->
         digit
 
       {alpha, 1} ->
