@@ -337,7 +337,8 @@ defmodule Explorer.Chain.AdvancedFilter do
           | token_id: fragment("UNNEST(?)", token_transfer.token_ids),
             amount:
               fragment("UNNEST(COALESCE(?, ARRAY[COALESCE(?, 1)]))", token_transfer.amounts, token_transfer.amount),
-            reverse_index_in_batch: fragment("GENERATE_SERIES(COALESCE(ARRAY_LENGTH(?, 1), 1), 1, -1)", token_transfer.amounts),
+            reverse_index_in_batch:
+              fragment("GENERATE_SERIES(COALESCE(ARRAY_LENGTH(?, 1), 1), 1, -1)", token_transfer.amounts),
             token_decimals: token.decimals
         },
         order_by: [
