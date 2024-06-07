@@ -3,6 +3,7 @@ FROM hexpm/elixir:1.14.5-erlang-24.2.2-alpine-3.18.2 AS builder
 WORKDIR /app
 ENV MIX_ENV="prod"
 
+# Install necessary packages
 RUN apk --no-cache --update add alpine-sdk gmp-dev automake libtool inotify-tools autoconf python3 file gcompat
 
 RUN set -ex && \
@@ -19,6 +20,7 @@ ENV MIX_HOME=/opt/mix
 RUN mix local.hex --force
 RUN mix do deps.get, local.rebar --force, deps.compile
 
+# Add the remaining files
 ADD apps ./apps
 ADD config ./config
 ADD rel ./rel
@@ -51,10 +53,14 @@ FROM hexpm/elixir:1.14.5-erlang-24.2.2-alpine-3.18.2
 
 WORKDIR /app
 
+# Copy the built release from the builder stage
 COPY --from=builder /opt/release/blockscout .
-COPY --from=builder /app/apps/explorer/node_modules ./node_modules
+
+# Ensure config_helper.exs is copied to the correct location
 COPY --from=builder /app/config/config_helper.exs ./config/config_helper.exs
 COPY --from=builder /app/config/config_helper.exs /app/releases/${RELEASE_VERSION}/config_helper.exs
-COPY --from=builder /app/config/assets/precompiles-arbitrum.json ./config/assets/precompiles-arbitrum.json
+
+# Ensure node_modules are copied
+COPY --from=builder /app/apps/explorer/node_modules ./node_modules
 
 CMD ["bin/blockscout", "start"]
