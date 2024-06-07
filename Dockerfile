@@ -1,16 +1,30 @@
 FROM hexpm/elixir:1.14.5-erlang-24.2.2-alpine-3.18.2 AS builder
 
 WORKDIR /app
+
 ENV MIX_ENV="prod"
 
-# Copy the config directory
-COPY config /app/config
-
-# Install necessary packages
 RUN apk --no-cache --update add alpine-sdk gmp-dev automake libtool inotify-tools autoconf python3 file gcompat
 
 RUN set -ex && \
     apk --update add libstdc++ curl ca-certificates gcompat
+
+ARG CACHE_EXCHANGE_RATES_PERIOD
+ARG API_V1_READ_METHODS_DISABLED
+ARG DISABLE_WEBAPP
+ARG API_V1_WRITE_METHODS_DISABLED
+ARG CACHE_TOTAL_GAS_USAGE_COUNTER_ENABLED
+ARG ADMIN_PANEL_ENABLED
+ARG CACHE_ADDRESS_WITH_BALANCES_UPDATE_INTERVAL
+ARG SESSION_COOKIE_DOMAIN
+ARG MIXPANEL_TOKEN
+ARG MIXPANEL_URL
+ARG AMPLITUDE_API_KEY
+ARG AMPLITUDE_URL
+ARG CHAIN_TYPE
+ENV CHAIN_TYPE=${CHAIN_TYPE}
+ARG BRIDGED_TOKENS_ENABLED
+ENV BRIDGED_TOKENS_ENABLED=${BRIDGED_TOKENS_ENABLED}
 
 # Cache elixir deps
 ADD mix.exs mix.lock ./
@@ -23,7 +37,6 @@ ENV MIX_HOME=/opt/mix
 RUN mix local.hex --force
 RUN mix do deps.get, local.rebar --force, deps.compile
 
-# Add the remaining files
 ADD apps ./apps
 ADD config ./config
 ADD rel ./rel
@@ -31,7 +44,7 @@ ADD *.exs ./
 
 RUN apk add --update nodejs npm
 
-# Run frontend build and phoenix digest
+# Run forderground build and phoenix digest
 RUN mix compile && npm install npm@latest
 
 # Add blockscout npm deps
@@ -43,7 +56,8 @@ RUN cd apps/block_scout_web/assets/ && \
     apk update && \
     apk del --force-broken-world alpine-sdk gmp-dev automake libtool inotify-tools autoconf python3
 
-RUN apk add --update git make
+
+RUN apk add --update git make 
 
 RUN mix phx.digest
 
@@ -54,15 +68,20 @@ RUN mkdir -p /opt/release \
 ##############################################################
 FROM hexpm/elixir:1.14.5-erlang-24.2.2-alpine-3.18.2
 
+ARG RELEASE_VERSION
+ENV RELEASE_VERSION=${RELEASE_VERSION}
+ARG CHAIN_TYPE
+ENV CHAIN_TYPE=${CHAIN_TYPE}
+ARG BRIDGED_TOKENS_ENABLED
+ENV BRIDGED_TOKENS_ENABLED=${BRIDGED_TOKENS_ENABLED}
+ARG BLOCKSCOUT_VERSION
+ENV BLOCKSCOUT_VERSION=${BLOCKSCOUT_VERSION}
+
+RUN apk --no-cache --update add jq curl
+
 WORKDIR /app
 
-# Copy the built release from the builder stage
 COPY --from=builder /opt/release/blockscout .
-
-# Ensure config_helper.exs is copied to the correct location
-COPY --from=builder /config/config_helper.exs /app/releases/6.6.0/config_helper.exs
-
-# Ensure node_modules are copied
 COPY --from=builder /app/apps/explorer/node_modules ./node_modules
-
-CMD ["bin/blockscout", "start"]
+COPY --from=builder /app/config/config_helper.exs ./config/config_helper.exs
+COPY --from=builder /app/config/config_helper.exs /app/releases/${RELEASE_VERSION}/config_helper.exs
