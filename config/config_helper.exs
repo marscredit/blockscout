@@ -222,7 +222,7 @@ defmodule ConfigHelper do
 
   def block_transformer do
     block_transformers = %{
-      "clique" => Blocks.Clique,x
+      "clique" => Blocks.Clique,
       "base" => Blocks.Base
     }
 
