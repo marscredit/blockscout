@@ -103,32 +103,29 @@ defmodule ConfigHelper do
   end
 
   @doc """
-Parses value of env var through catalogued values list. If a value is not in the list, nil is returned.
-Also, the application shutdown option is supported, if a value is wrong.
-"""
-@spec parse_catalog_value(String.t(), List.t(), bool(), String.t() | nil) :: atom() | nil
-def parse_catalog_value(env_var, catalog, shutdown_on_wrong_value?, default_value \\ nil) do
-  value = env_var |> safe_get_env(default_value)
+  Parses value of env var through catalogued values list. If a value is not in the list, nil is returned.
+  Also, the application shutdown option is supported, if a value is wrong.
+  """
+  @spec parse_catalog_value(String.t(), List.t(), bool(), String.t() | nil) :: atom() | nil
+  def parse_catalog_value(env_var, catalog, shutdown_on_wrong_value?, default_value \\ nil) do
+    value = env_var |> safe_get_env(default_value)
 
-  Logger.info("Parsing catalog value: #{value} for env_var: #{env_var}")
-
-  if value !== "" do
-    if value in catalog do
-      String.to_atom(value)
-    else
-      error_message = wrong_value_error(value, env_var, catalog)
-      Logger.error(error_message)
-      if shutdown_on_wrong_value? do
-        exit(:shutdown)
+    if value !== "" do
+      if value in catalog do
+        String.to_atom(value)
       else
-        Logger.warn(error_message)
-        nil
+        if shutdown_on_wrong_value? do
+          Logger.error(wrong_value_error(value, env_var, catalog))
+          exit(:shutdown)
+        else
+          Logger.warning(wrong_value_error(value, env_var, catalog))
+          nil
+        end
       end
+    else
+      nil
     end
-  else
-    nil
   end
-end
 
   defp wrong_value_error(value, env_var, catalog) do
     "Invalid value \"#{value}\" of #{env_var} environment variable is provided. Supported values are #{inspect(catalog)}"
