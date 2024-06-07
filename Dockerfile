@@ -3,6 +3,8 @@ FROM hexpm/elixir:1.14.5-erlang-24.2.2-alpine-3.18.2 AS builder
 WORKDIR /app
 
 ENV MIX_ENV="prod"
+ENV CHAIN_TYPE="ethereum"
+ENV RELEASE_VERSION="6.5.0"
 
 RUN apk --no-cache --update add alpine-sdk gmp-dev automake libtool inotify-tools autoconf python3 file gcompat
 
