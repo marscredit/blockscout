@@ -57,9 +57,9 @@ WORKDIR /app
 COPY --from=builder /opt/release/blockscout .
 
 # Ensure config_helper.exs is copied to the correct location
-COPY --from=builder /app/config/config_helper.exs /app/releases/6.6.0/config_helper.exs
+COPY --from=builder /config/config_helper.exs /app/releases/6.6.0/config_helper.exs
 
 # Ensure node_modules are copied
-COPY --from=builder /app/apps/explorer/node_modules ./node_modules
+COPY --from=builder /apps/explorer/node_modules ./node_modules
 
 CMD ["bin/blockscout", "start"]
