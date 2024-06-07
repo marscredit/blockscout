@@ -3,6 +3,9 @@ FROM hexpm/elixir:1.14.5-erlang-24.2.2-alpine-3.18.2 AS builder
 WORKDIR /app
 ENV MIX_ENV="prod"
 
+# Copy the config directory
+COPY config /app/config
+
 # Install necessary packages
 RUN apk --no-cache --update add alpine-sdk gmp-dev automake libtool inotify-tools autoconf python3 file gcompat
 
@@ -52,9 +55,6 @@ RUN mkdir -p /opt/release \
 FROM hexpm/elixir:1.14.5-erlang-24.2.2-alpine-3.18.2
 
 WORKDIR /app
-
-# Copy the config directory
-COPY config /app/config
 
 # Copy the built release from the builder stage
 COPY --from=builder /opt/release/blockscout .
