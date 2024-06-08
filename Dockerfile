@@ -1,3 +1,4 @@
+# First stage: build
 FROM hexpm/elixir:1.14.5-erlang-24.2.2-alpine-3.18.2 AS builder
 
 WORKDIR /app
@@ -6,11 +7,13 @@ ENV MIX_ENV="prod"
 ENV CHAIN_TYPE="ethereum"
 ENV RELEASE_VERSION="6.5.0"
 
+# Install dependencies
 RUN apk --no-cache --update add alpine-sdk gmp-dev automake libtool inotify-tools autoconf python3 file gcompat
 
 RUN set -ex && \
     apk --update add libstdc++ curl ca-certificates gcompat
 
+# Set ARG variables
 ARG CACHE_EXCHANGE_RATES_PERIOD
 ARG API_V1_READ_METHODS_DISABLED
 ARG DISABLE_WEBAPP
@@ -56,36 +59,4 @@ RUN cd apps/block_scout_web/assets/ && \
     cd /app/apps/explorer/ && \
     npm install && \
     apk update && \
-    apk del --force-broken-world alpine-sdk gmp-dev automake libtool inotify-tools autoconf python3
-
-
-RUN apk add --update git make 
-
-RUN mix phx.digest
-
-RUN mkdir -p /opt/release \
-    && mix release blockscout \
-    && mv _build/${MIX_ENV}/rel/blockscout /opt/release
-
-##############################################################
-FROM hexpm/elixir:1.14.5-erlang-24.2.2-alpine-3.18.2
-
-ARG RELEASE_VERSION
-ENV RELEASE_VERSION=${RELEASE_VERSION}
-ARG CHAIN_TYPE
-ENV CHAIN_TYPE=${CHAIN_TYPE}
-ARG BRIDGED_TOKENS_ENABLED
-ENV BRIDGED_TOKENS_ENABLED=${BRIDGED_TOKENS_ENABLED}
-ARG BLOCKSCOUT_VERSION
-ENV BLOCKSCOUT_VERSION=${BLOCKSCOUT_VERSION}
-
-RUN apk --no-cache --update add jq curl
-
-WORKDIR /app
-
-COPY --from=builder /opt/release/blockscout .
-COPY --from=builder /app/apps/explorer/node_modules ./node_modules
-COPY --from=builder /app/config/config_helper.exs ./config/config_helper.exs
-COPY --from=builder /app/config/config_helper.exs /app/releases/${RELEASE_VERSION}/config_helper.exs
-
-CMD ["bin/blockscout", "start"]
+    apk del --force-broken-world alpine-sdk gmp-dev automake libtool inotify
