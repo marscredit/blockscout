@@ -64,9 +64,9 @@ RUN apk update && \
     apk del --force-broken-world alpine-sdk gmp-dev automake libtool inotify-tools autoconf python3 file gcompat
 
 # Move the built release to a new stage
-RUN mkdir -p /opt/release \
-    && mix release blockscout \
-    && mv _build/${MIX_ENV}/rel/blockscout /opt/release
+RUN mkdir -p /opt/release && \
+    MIX_ENV=prod mix release blockscout && \
+    cp -R _build/prod/rel/blockscout /opt/release
 
 # Second stage: run
 FROM hexpm/elixir:1.14.5-erlang-24.2.2-alpine-3.18.2
