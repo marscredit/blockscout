@@ -19,7 +19,8 @@ RUN apk --no-cache --update add \
     file \
     gcompat \
     nodejs \
-    npm
+    npm \
+    git
 
 RUN set -ex && \
     apk --update add libstdc++ curl ca-certificates gcompat
@@ -71,6 +72,12 @@ RUN cd /app/apps/explorer/ && \
 
 RUN apk update && \
     apk del --force-broken-world alpine-sdk gmp-dev automake libtool inotify-tools autoconf python3 file gcompat
+
+# Debugging: Show current directory and files
+RUN ls -la /app
+
+# Ensure all git dependencies are available
+RUN git config --global --add safe.directory /app/deps/websocket_client
 
 # Move the built release to a new stage
 RUN mkdir -p /opt/release && \
