@@ -49,14 +49,44 @@ ADD *.exs ./
 
 RUN apk add --update nodejs npm
 
-# Run forderground build and phoenix digest
+# Run foreground build and phoenix digest
 RUN mix compile && npm install npm@latest
 
 # Add blockscout npm deps
 RUN cd apps/block_scout_web/assets/ && \
     npm install && \
-    npm run deploy && \
-    cd /app/apps/explorer/ && \
-    npm install && \
-    apk update && \
-    apk del --force-broken-world alpine-sdk gmp-dev automake libtool inotify
+    npm run deploy
+
+RUN cd /app/apps/explorer/ && \
+    npm install
+
+RUN apk update && \
+    apk del --force-broken-world alpine-sdk gmp-dev automake libtool inotify-tools autoconf python3 file gcompat
+
+# Move the built release to a new stage
+RUN mkdir -p /opt/release \
+    && mix release blockscout \
+    && mv _build/${MIX_ENV}/rel/blockscout /opt/release
+
+# Second stage: run
+FROM hexpm/elixir:1.14.5-erlang-24.2.2-alpine-3.18.2
+
+ARG RELEASE_VERSION
+ENV RELEASE_VERSION=${RELEASE_VERSION}
+ARG CHAIN_TYPE
+ENV CHAIN_TYPE=${CHAIN_TYPE}
+ARG BRIDGED_TOKENS_ENABLED
+ENV BRIDGED_TOKENS_ENABLED=${BRIDGED_TOKENS_ENABLED}
+ARG BLOCKSCOUT_VERSION
+ENV BLOCKSCOUT_VERSION=${BLOCKSCOUT_VERSION}
+
+RUN apk --no-cache --update add jq curl
+
+WORKDIR /app
+
+COPY --from=builder /opt/release/blockscout .
+COPY --from=builder /app/apps/explorer/node_modules ./node_modules
+COPY --from=builder /app/config/config_helper.exs ./config/config_helper.exs
+COPY --from=builder /app/releases/${RELEASE_VERSION}/config_helper.exs
+
+CMD ["bin/blockscout", "start"]
