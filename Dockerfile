@@ -8,7 +8,18 @@ ENV CHAIN_TYPE="ethereum"
 ENV RELEASE_VERSION="6.5.0"
 
 # Install dependencies
-RUN apk --no-cache --update add alpine-sdk gmp-dev automake libtool inotify-tools autoconf python3 file gcompat
+RUN apk --no-cache --update add \
+    alpine-sdk \
+    gmp-dev \
+    automake \
+    libtool \
+    inotify-tools \
+    autoconf \
+    python3 \
+    file \
+    gcompat \
+    nodejs \
+    npm
 
 RUN set -ex && \
     apk --update add libstdc++ curl ca-certificates gcompat
@@ -46,8 +57,6 @@ ADD apps ./apps
 ADD config ./config
 ADD rel ./rel
 ADD *.exs ./
-
-RUN apk add --update nodejs npm
 
 # Run foreground build and phoenix digest
 RUN mix compile && npm install npm@latest
