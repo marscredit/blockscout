@@ -5,5 +5,7 @@ services:
     image: 'redis:alpine'
     container_name: redis-db
     command: redis-server
+    environment:
+      REDIS_URL: "redis://default:VLTewxpoodfpoHchxbhvKafVdKTqqEOk@viaduct.proxy.rlwy.net:59953"
     volumes:
       - ./redis-data:/data
