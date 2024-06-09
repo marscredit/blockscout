@@ -106,5 +106,3 @@ COPY --from=builder /app/apps/explorer/node_modules ./node_modules
 COPY --from=builder /app/config/config_helper.exs ./config/config_helper.exs
 # Ensure the config_helper.exs is copied from the correct path
 COPY --from=builder /app/config/config_helper.exs ./releases/${RELEASE_VERSION}/config_helper.exs
-
-CMD ["bin/blockscout", "start"]
