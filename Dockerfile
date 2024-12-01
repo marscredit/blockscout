@@ -13,9 +13,9 @@ RUN apk add --no-cache \
 
 # Set environment variables
 ENV MIX_ENV=prod \
-    SECRET_KEY_BASE=changeme \
-    DATABASE_URL=postgresql://postgres:password@localhost/blockscout_db \
-    REDIS_URL=redis://localhost:6379/0
+    SECRET_KEY_BASE=${SECRET_KEY_BASE} \
+    DATABASE_URL=${DATABASE_URL} \
+    REDIS_URL=${REDIS_URL}
 
 # Copy the app source code
 WORKDIR /app
