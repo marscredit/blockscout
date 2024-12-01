@@ -1,4 +1,4 @@
-FROM elixir:1.13-alpine
+FROM hexpm/elixir:1.17.3-erlang-27.1-alpine-3.20.3
 
 # Install dependencies
 RUN apk add --no-cache \
