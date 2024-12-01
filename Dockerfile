@@ -1,4 +1,4 @@
-FROM elixir:1.14-alpine
+FROM elixir:1.13-alpine
 
 # Install dependencies
 RUN apk add --no-cache \
