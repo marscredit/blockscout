@@ -4,12 +4,15 @@ FROM elixir:1.14-alpine
 RUN apk add --no-cache \
     bash \
     git \
-    build-base \
+    # Essential for C compilation (includes gcc and related tools)
+    build-base \  
     postgresql-client \
     nodejs \
     npm \
     openssl \
-    curl
+    curl \
+    # Add libc development tools for C-based libraries
+    libc-dev 
 
 # Set environment variables
 ENV MIX_ENV=prod \
