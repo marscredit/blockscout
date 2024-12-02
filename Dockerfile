@@ -42,5 +42,5 @@ RUN chmod +x /app/docker_entrypoint.sh
 # Expose Phoenix port
 EXPOSE 443
 
-# Command to start the backend
-CMD ["mix", "phx.server"]
+# Start with the database setup script
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
