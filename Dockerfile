@@ -43,4 +43,4 @@ RUN chmod +x /app/docker_entrypoint.sh
 EXPOSE 443
 
 # Start with the database setup script
-ENTRYPOINT ["/app/docker-entrypoint.sh"]
+ENTRYPOINT ["/app/docker_entrypoint.sh"]
