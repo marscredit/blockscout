@@ -30,8 +30,17 @@ RUN mix local.hex --force && mix local.rebar --force
 # Install dependencies and build
 RUN mix deps.get && mix compile && mix phx.digest
 
+# Install Node.js dependencies and build frontend assets
+RUN npm install --prefix apps/block_scout_web/assets
+RUN npm run deploy --prefix apps/block_scout_web/assets
+RUN mix phx.digest
+
+# Add database initialization script
+COPY ./docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
+
 # Expose Phoenix port
-EXPOSE 4000
+EXPOSE 443
 
 # Command to start the backend
 CMD ["mix", "phx.server"]
