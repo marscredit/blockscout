@@ -37,7 +37,7 @@ RUN mix phx.digest
 
 # Add database initialization script
 COPY ./docker_entrypoint.sh /app/docker_entrypoint.sh
-RUN chmod +x /app/docker-entrypoint.sh
+RUN chmod +x /app/docker_entrypoint.sh
 
 # Expose Phoenix port
 EXPOSE 443
