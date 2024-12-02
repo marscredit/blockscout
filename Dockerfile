@@ -36,7 +36,7 @@ RUN npm run deploy --prefix apps/block_scout_web/assets
 RUN mix phx.digest
 
 # Add database initialization script
-COPY ./docker-entrypoint.sh /app/docker-entrypoint.sh
+COPY ./docker_entrypoint.sh /app/docker_entrypoint.sh
 RUN chmod +x /app/docker-entrypoint.sh
 
 # Expose Phoenix port
