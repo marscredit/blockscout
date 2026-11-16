@@ -286,6 +286,45 @@ defmodule ConfigHelper do
     err -> raise "Invalid JSON in environment variable #{env_var}: #{inspect(err)}"
   end
 
+  @doc """
+  Parses `CORS_ALLOWED_ORIGINS` (or another env var) into CORSPlug's `origin` value.
+
+  An unset or empty value keeps the historical wildcard (`"*"`). A comma-separated
+  list is trimmed and returned as origin strings. Scheme-less hostnames such as
+  `blockscan.marscredit.xyz` are expanded to both `https://` and `http://` origins
+  so they match the browser `Origin` header.
+  """
+  @spec parse_cors_allowed_origins(String.t()) :: String.t() | [String.t()]
+  def parse_cors_allowed_origins(env_var \\ "CORS_ALLOWED_ORIGINS") do
+    parse_cors_allowed_origins_value(System.get_env(env_var))
+  end
+
+  @spec parse_cors_allowed_origins_value(String.t() | nil) :: String.t() | [String.t()]
+  def parse_cors_allowed_origins_value(value) when value in [nil, ""], do: "*"
+
+  def parse_cors_allowed_origins_value(value) do
+    origins =
+      value
+      |> String.split(",", trim: true)
+      |> Enum.flat_map(&normalize_cors_origin/1)
+
+    case origins do
+      [] -> "*"
+      list -> list
+    end
+  end
+
+  defp normalize_cors_origin(origin) do
+    origin = origin |> String.trim() |> String.trim_trailing("/")
+
+    cond do
+      origin == "" -> []
+      origin == "*" -> ["*"]
+      String.starts_with?(origin, ["http://", "https://"]) -> [origin]
+      true -> ["https://" <> origin, "http://" <> origin]
+    end
+  end
+
   @spec parse_list_env_var(String.t(), String.t() | nil) :: list()
   def parse_list_env_var(env_var, default_value \\ nil) do
     addresses_var = safe_get_env(env_var, default_value)
