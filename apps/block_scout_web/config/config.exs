@@ -18,7 +18,8 @@ config :block_scout_web,
   session_cookie_ttl: 60 * 60 * 24 * 7,
   invalid_session_key: "invalid_session",
   api_v2_temp_token_key: "api_v2_temp_token",
-  http_adapter: HTTPoison
+  http_adapter: HTTPoison,
+  cors_allowed_origins: "*"
 
 config :block_scout_web,
   admin_panel_enabled: ConfigHelper.parse_bool_env_var("ADMIN_PANEL_ENABLED")

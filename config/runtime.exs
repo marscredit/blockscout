@@ -36,7 +36,8 @@ config :block_scout_web,
   hide_scam_addresses: ConfigHelper.parse_bool_env_var("HIDE_SCAM_ADDRESSES"),
   show_tenderly_link: ConfigHelper.parse_bool_env_var("SHOW_TENDERLY_LINK"),
   sensitive_endpoints_api_key: System.get_env("API_SENSITIVE_ENDPOINTS_KEY"),
-  disable_api?: disable_api?
+  disable_api?: disable_api?,
+  cors_allowed_origins: ConfigHelper.parse_cors_allowed_origins("CORS_ALLOWED_ORIGINS")
 
 config :block_scout_web, :recaptcha,
   v2_client_key: System.get_env("RE_CAPTCHA_CLIENT_KEY"),
